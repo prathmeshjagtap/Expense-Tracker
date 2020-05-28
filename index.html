@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Expence</title>
+    <link
+			rel="stylesheet"
+			href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+			integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+			crossorigin="anonymous"
+     />
+    <script
+        defer
+        src="https://use.fontawesome.com/releases/v5.7.2/js/all.js"
+        integrity="sha384-0pzryjIRos8mFBWMzSSZApWtPl/5++eIfzYmTgBBmXYdhvxPc+XcFEk+zJwDgWbP"
+        crossorigin="anonymous"
+    ></script>
+    
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <span class="navbar-brand mb-0 h1">Prathmesh Expence App </span>
+        <span class="navbar-brand mb-0 h1 "id= "headingTotal" ></span>
+    </nav>
+    <div class="container-fluid bg-light" style="min-height: 100vh">
+        <div class="container">
+            <!-- <h1 id="headingTotal"> </h1> -->
+            <div class="jumbotron mt-4">
+                <div class="input-group mb-3">
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="inputAmount"
+                        placeholder="Amount spent"
+                        aria-label="Amount spent"
+                        aria-describedby="spent in rupee"
+                    />
+                    <div class="input-group-append">
+                        <span class="input-group-text" id="spent in rupee">₹</span>
+                    </div>
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="spent at">@</span>
+                    </div>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="inputdesc"
+                        placeholder="spent On"
+                        aria-label="spent On"
+                        aria-describedby="spent at"
+                    />
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-primary" type="button" id="btncounter">Add</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- <input id="inputAmount" type="text"> -->
+            <!-- <input id="inputdesc" type="text"> -->
+            <!-- <button id="btncounter">+</button> -->
+            <div id="expenceTable"></div>
+            <div>
+                <ul class="list-group" id="expenceTable">
+
+                </ul>
+        </div>
+    </div>
+    
+    
+    <script>
+           //getting the heading element
+
+           const headingEL = document.getElementById("headingTotal");
+
+           //gettting the reference to desc element
+           const  inputdescEL=document.getElementById("inputdesc")
+           //gettting the reference to input amount element
+           const inputElement = document.getElementById("inputAmount");
+           //getting the reference to  table
+           const expenceTableEL =document.getElementById("expenceTable")
+           // init value of expence at 0
+
+          let  totalExpence =0;
+
+          // set the heading element to total expence
+          headingEL.textContent = totalExpence;
+          //array of allexpences 
+
+          let allExpences=[];
+
+          //onbuttonclick add input amount to total expence
+
+          function addExpenceToTotal(){
+             const expenceItem = {};  
+
+              //read value from input amount
+              const textAmount = inputElement.value;
+              //read value from input desc
+              const textdesc = inputdescEL.value;
+              
+              //convert it to number
+              const expence = parseInt(textAmount,10)
+              //object filling
+              expenceItem.desc= textdesc;
+              expenceItem.amount= expence;
+              expenceItem.moment= new Date();
+              //pushing info in array
+               allExpences.push(expenceItem);
+             // console.clear();
+              //console.table(allExpences);
+              
+              //add the value to total expence
+              totalExpence=totalExpence+expence;
+              //set the heading element to totalexpence
+              //const sometext ="The  expence for this month is "+totalExpence;
+              const sometext =`Total :${totalExpence}`; 
+                  
+              
+              headingEL.textContent=sometext;
+              renderList(allExpences);
+              
+
+          }
+         
+         //get the btn number
+        const element = document.querySelector("#btncounter");
+        //listen to click event 
+        element.addEventListener('click',addExpenceToTotal,false);
+        // controller Functions
+        //  get date string
+        function getDateString(moment){
+            return moment.toLocaleDateString(`en-US`,
+            { 
+                   year: 'numeric', 
+                   month: 'long',
+                   day: 'numeric'})
+        }
+        // new totalexpence function
+        function updateTotalExpence(){
+            const sometext =`Total :${totalExpence}`; 
+            headingEL.textContent=sometext;
+        }
+        //  delete function 
+        function deleteItem(dateValue,amount){
+            const newArr= [];
+            // console.log("delete is called" ,  dateValue)
+            for (let i  = 0; i < allExpences.length; i ++) {
+                if(allExpences[i].moment.valueOf() === dateValue)
+                allExpences.splice(i, 1);
+                // newArr.push(allExpences[i])
+                
+            }
+            renderList()
+            totalExpence  -= amount;
+            updateTotalExpence();
+            // console.log(newArr)
+        }
+        function renderList(){
+            const allExpenceHTMl = allExpences.map(expence =>createListAmount(expence));
+            const joinedallExpenceHTML = allExpenceHTMl.join("");
+            expenceTableEL.innerHTML = joinedallExpenceHTML;
+
+        }
+
+
+        // view layer
+        function createListAmount({desc,amount,moment}){
+            return `<li class="list-group-item d-flex justify-content-between">
+							<div class="d-flex flex-column">
+								${desc}
+								<small class="text-muted">${getDateString(moment)}</small>
+							</div>
+							<div>
+								<span class="px-5">
+                                    ${amount}
+								</span>
+								<button type="button"
+                                        class="btn btn-outline-danger btn-sm"
+                                         onclick="deleteItem(${moment.valueOf()},${amount})"
+                                        >
+									<i class="fas fa-trash-alt"></i>
+								</button>
+							</div>
+						</li>
+                        `
+
+          }
+    </script>
+    
+</body>
+</html>
